@@ -142,8 +142,9 @@ public class MainMenu extends javax.swing.JFrame {
         separatorFile1 = new javax.swing.JPopupMenu.Separator();
         fileProperties = new javax.swing.JMenuItem();
         separatorFile2 = new javax.swing.JPopupMenu.Separator();
-        fileImport = new javax.swing.JMenuItem();
         fileExport = new javax.swing.JMenuItem();
+        fileImport = new javax.swing.JMenuItem();
+        fileImportCharactersFromTextFile = new javax.swing.JMenuItem();
         filePrint = new javax.swing.JMenuItem();
         separatorFile3 = new javax.swing.JPopupMenu.Separator();
         fileExit = new javax.swing.JMenuItem();
@@ -681,6 +682,15 @@ public class MainMenu extends javax.swing.JFrame {
             }
         });
         menuFile.add(fileImport);
+        
+        fileImportCharactersFromTextFile.setText(bundle.getString("msg.file.import_characters_from_text_file"));
+        fileImportCharactersFromTextFile.setActionCommand("fileImportCharactersFromTextFile");
+        fileImportCharactersFromTextFile.addActionListener(new java.awt.event.ActionListener(){
+        	public void actionPerformed(java.awt.event.ActionEvent evt){
+        		fileImportCharactersFromTextFileActionPerformed(evt);
+        	}
+        });
+        menuFile.add(fileImportCharactersFromTextFile);
 
         fileExport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, java.awt.event.InputEvent.CTRL_MASK));
         fileExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/storybook/resources/icons/16x16/export.png"))); // NOI18N
@@ -2118,6 +2128,10 @@ public class MainMenu extends javax.swing.JFrame {
 		 SwingUtil.showModalDialog(dlg, mainFrame);*/
     }//GEN-LAST:event_fileImportActionPerformed
 
+    private void fileImportCharactersFromTextFileActionPerformed(java.awt.event.ActionEvent evt) {
+    	
+    }//GEN-LAST:event_fileImportCharactersFromTExtFileActionPerformed
+    
     private void jChaptersOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jChaptersOrderActionPerformed
         ChaptersOrderDialog dlg = new ChaptersOrderDialog(mainFrame);
 		SwingUtil.showModalDialog(dlg, mainFrame);
@@ -2219,6 +2233,7 @@ public class MainMenu extends javax.swing.JFrame {
     private javax.swing.JMenuItem fileExit;
     private javax.swing.JMenuItem fileExport;
     private javax.swing.JMenuItem fileImport;
+    private javax.swing.JMenuItem fileImportCharactersFromTextFile;
     private javax.swing.JMenuItem fileNew;
     private javax.swing.JMenuItem fileOpen;
     public javax.swing.JMenu fileOpenRecent;

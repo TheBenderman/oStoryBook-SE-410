@@ -27,6 +27,7 @@ import storybook.SbConstants;
 import storybook.SbConstants.ViewName;
 import storybook.exporter.BookExporter;
 import storybook.exporter.DlgExport;
+import storybook.importer.CharactersFromTextFileImporter;
 import storybook.model.hbn.entity.AbstractEntity;
 import storybook.model.hbn.entity.Category;
 import storybook.model.hbn.entity.Chapter;
@@ -2129,7 +2130,8 @@ public class MainMenu extends javax.swing.JFrame {
     }//GEN-LAST:event_fileImportActionPerformed
 
     private void fileImportCharactersFromTextFileActionPerformed(java.awt.event.ActionEvent evt) {
-    	
+    	CharactersFromTextFileImporter importer = new CharactersFromTextFileImporter(mainFrame);
+    	importer.importCharactersFromTextFile();
     }//GEN-LAST:event_fileImportCharactersFromTExtFileActionPerformed
     
     private void jChaptersOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jChaptersOrderActionPerformed

@@ -52,8 +52,7 @@ public class CharactersFromTextFileImporter{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ArrayList<String> people = new ArrayList<String>();
-		ArrayList<person> myperson = new ArrayList<person>(); // arraylist for names of people
+		ArrayList<String> people = new ArrayList<String>(); // iuytuyigtuyigtuiguigukguigtuigyiugyiufg
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;
 		try {
@@ -63,27 +62,14 @@ public class CharactersFromTextFileImporter{
 			
 			for (Triple<String, Integer, Integer> item : list) 
 			{
-				if (item.first().equals("PERSON"))
-					people.add(lines.substring(item.second, item.third()));
+				if (item.first().equals("PERSON"))// guogkjbhkjbjkgjkgjkhjkgkjlghkj
+					people.add(lines.substring(item.second, item.third())); // khghkghkgkhgkjgkjghkjhkjgkjgjk
 			}
 		} catch (ClassCastException | ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(String ppl: people){ // iterate list names of people
-			p = new person(); // create new person object
-			String First_name = ""; // set first name empty
-			String Last_name = ""; // set last name empty
-			String Abbreviation = ""; // set abbreviation empty
-			Last_name =  ppl.substring(ppl.lastIndexOf(" ")+1); // remove first name and abbreviation from string
-			p.set_lastName(Last_name); // set person object last name
-			First_name = ppl.substring(0, ppl.lastIndexOf(' ')); // remove last name from string
-			p.set_firstName(First_name); // set person object first name
-			int x = ppl.indexOf(' '); // get index of first space
-			Abbreviation = ppl.substring(0, x); // remove first and last name from string
-			p.set_abrv(Abbreviation); // set person object abrreviation
-			myperson.add(p); // add person object to arraylist
-			}// end people loop
+	
 		}
 	}
 }

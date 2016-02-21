@@ -68,13 +68,13 @@ public class CharactersFromTextFileImporter{
 		int count = 0; // counter for fancy for loop
 		CharSequence prefixes = "Mr.","Dr.","Ms.","Miss.","Mrs.","mr","dr","ms","miss","mrs","uncle","aunt","mom","dad","sister","brother","cousin"); // character sequences of common prefixes
 		for(String name: people){ // iterates over peoples names
-			if(name.contains(prefixes)){	 // check if persons' name contains a prefix
+			if(name.toLowerCase().contains(prefixes.toLowerCase())){	 // check if persons' name contains a prefix
 					String[] prename = name.split(" ",2); // split the prefix from the name
 					people.get(count) = prename[1]; // save the name to the people's arraylist
 				}
 			count++; // increment counter + 1
 			}
-		//
+		// end prefix loop
 		}
 	}
 }

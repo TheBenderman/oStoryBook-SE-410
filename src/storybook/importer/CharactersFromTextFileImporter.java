@@ -47,9 +47,8 @@ public class CharactersFromTextFileImporter{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		// arraylist for names of people
 		ArrayList<String> people = new ArrayList<String>();
-		
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;
 		try {
@@ -65,6 +64,17 @@ public class CharactersFromTextFileImporter{
 		} catch (ClassCastException | ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		int count = 0; // counter for fancy for loop
+		CharSequence prefixes = "Mr.","Dr.","Ms.","Miss.","Mrs.","mr","dr","ms","miss","mrs","uncle","aunt","mom","dad","sister","brother","cousin"); // character sequences of common prefixes
+		for(String name: people){ // iterates over peoples names
+			if(name.contains(prefixes)){	 // check if persons' name contains a prefix
+					String[] prename = name.split(" ",2); // split the prefix from the name
+					people.get(count) = prename[1]; // save the name to the people's arraylist
+				}
+			count++; // increment counter + 1
+			}
+		//
 		}
 	}
 }

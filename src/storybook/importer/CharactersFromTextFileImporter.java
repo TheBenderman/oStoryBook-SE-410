@@ -66,9 +66,9 @@ public class CharactersFromTextFileImporter{
 								abrv.append(p.getLastname().substring(0, 2));
 							}
 							p.setAbbreviation(abrv.toString());
+							aperson.add(p);
 			          		}
 			          	}
-				  aperson.add(p);
 			} 
 			catch (ClassCastException | ClassNotFoundException | IOException e) {
 				e.printStackTrace();

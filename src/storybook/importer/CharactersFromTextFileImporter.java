@@ -44,7 +44,8 @@ public class CharactersFromTextFileImporter{
 			     "commander", "cmd.", "cmd", "cmdr", "rear", "radm", "r.adm.", "admiral", "adm.", "adm", "commodore",
 			     "cmd.", "cmd", "general", "gen", "gen.", "ltgen", "lt.gen.", "maj.gen.", "majgen.", "major", "maj.",
 			     "mjr", "maj", "seargent", "sgt.", "sgt", "chief", "cf.", "cf", "petty", "officer", "c.p.o.", "cpo",
-			     "master", "cmcpo", "fltmc", "formc", "mcpo", "mcpocg", "command", "fleet", "force", "miss."};
+			     "master", "cmcpo", "fltmc", "formc", "mcpo", "mcpocg", "command", "fleet", "force", "miss.", 
+			     "professor","prof","uncle","aunt","dad","mom","sister","brother","cousin","grandfather","grandmother"};
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		int returnValue = fileChooser.showOpenDialog(mainFrame);
@@ -77,8 +78,8 @@ public class CharactersFromTextFileImporter{
 		          				break; // break for loop
 		          				} 
 		          			} // exit prefix for loop
-		          		if(num==0){ // check if prefix not found 
-		          			people.add(l.substring(trip.second, trip.third())); // add name with no prefix
+		          		if(num == 0){ // check if prefix not found 
+		          			people.add(l.substring(trip.second, trip.third())); // add name without prefix
 		          		}
 					}
 				}
@@ -87,9 +88,10 @@ public class CharactersFromTextFileImporter{
 				e.printStackTrace();
 				System.out.println(e);
 			}
+		num = 0; // clear index
 		}
-		for(int c=0; c<people.size(); c++){
-			System.out.println(c+":"+people.get(c));
+		for(int c = 0; c < people.size(); c++){
+			System.out.println(c + ":" + people.get(c));
 	     }
 	}
 }

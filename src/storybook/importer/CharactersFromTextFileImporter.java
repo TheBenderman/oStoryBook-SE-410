@@ -57,14 +57,14 @@ public class CharactersFromTextFileImporter{
 			          		name = name.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim();
 			          		String[] names = name.split(" ");
 			          		p.setFirstname(names[0]);
-			          		if(names.length>1){
-			          			p.setLastname(names[names.length -1 ]);
-			          			}
-			          		StringBuffer abbreviation = new StringBuffer(p.getFirstname().substring(0, 2));
+			          		if(names.length > 1){
+			          			p.setLastname(names[names.length - 1]);
+			          		}
+			          		StringBuffer abrv = new StringBuffer(p.getFirstname().substring(0, 2));
 							if (names.length > 1) {
-								abbreviation.append(p.getLastname().substring(0,2));
+								abrv.append(p.getLastname().substring(0, 2));
 							}
-							p.setAbbreviation(abbreviation.toString());
+							p.setAbbreviation(abrv.toString());
 			          		}
 			          	}
 				  aperson.add(p);

@@ -44,7 +44,7 @@ public class CharactersFromTextFileImporter{
 			System.out.println(e);
 		}
 		ArrayList<String> people = new ArrayList<String>(); // arraylist of people names
-		ArratList<Person> aperson = new ArrayList<Person>();
+		ArrayList<Person> aperson = new ArrayList<Person>(); // arraylist of person objects
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;
 			try {

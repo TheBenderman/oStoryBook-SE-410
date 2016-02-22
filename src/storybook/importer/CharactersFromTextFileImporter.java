@@ -49,7 +49,7 @@ public class CharactersFromTextFileImporter{
 		AbstractSequenceClassifier<CoreLabel> classifier;
 			try {
 				classifier = CRFClassifier.getClassifier("english.all.3class.distsim.crf.ser.gz");
-				List<Triple<String, Integer, Integer>> list = classifier.classifyToCharacterOffsets(l);
+				List<Triple<String, Integer, Integer>> list = classifier.classifyToCharacterOffsets(lines);
 				  for (Triple<String, Integer, Integer> trip : list) {
 			          	if(trip.first().equals("PERSON")){
 			          		Person p = new Person();

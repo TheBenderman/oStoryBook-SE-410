@@ -53,6 +53,7 @@ public class CharactersFromTextFileImporter{
 				  for (Triple<String, Integer, Integer> trip : list) {
 			          	if(trip.first().equals("PERSON")){
 			          		Person p = new Person();
+			          		people.add(lines.substring(trip.second, trip.third()));
 			          		String name = lines.substring(trip.second, trip.third());
 			          		name = name.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim();
 			          		String[] names = name.split(" ");

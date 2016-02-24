@@ -34,6 +34,56 @@ public class CharactersFromTextFileImporter{
 	
 	public void importCharactersFromTextFile()
 	{
+<<<<<<< HEAD
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		int returnValue = fileChooser.showOpenDialog(mainFrame);
+		if (returnValue != JFileChooser.APPROVE_OPTION)
+			return;
+		File textFile = fileChooser.getSelectedFile();
+		String lines = "";
+		try {
+			lines = FileUtils.readFileToString(textFile); // store the entire textfile in string
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+			System.out.println(e);
+		}
+		ArrayList<String> people = new ArrayList<String>(); // arraylist of people names
+		ArrayList<Person> aperson = new ArrayList<Person>(); // arraylist of person objects
+		// Make sure this file is in your eclipse root folder
+		AbstractSequenceClassifier<CoreLabel> classifier;
+			try {
+				classifier = CRFClassifier.getClassifier("english.all.3class.distsim.crf.ser.gz");
+				List<Triple<String, Integer, Integer>> list = classifier.classifyToCharacterOffsets(lines);
+				  for (Triple<String, Integer, Integer> trip : list) {
+			          	if(trip.first().equals("PERSON")){
+			          		Person p = new Person();
+			          		people.add(lines.substring(trip.second, trip.third()));
+			          		String name = lines.substring(trip.second, trip.third());
+			          		name = name.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim();
+			          		String[] names = name.split(" ");
+			          		p.setFirstname(names[0]);
+			          		if(names.length > 1){
+			          			p.setLastname(names[names.length - 1]);
+			          		}
+			          		StringBuffer abrv = new StringBuffer(p.getFirstname().substring(0, 2));
+							if (names.length > 1) {
+								abrv.append(p.getLastname().substring(0, 2));
+							}
+							p.setAbbreviation(abrv.toString());
+							aperson.add(p);
+			          		}
+			          	}
+			} 
+			catch (ClassCastException | ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				System.out.println(e);
+			}
+		for(int c = 0; c < people.size(); c++){
+			System.out.println(c + ":" + people.get(c));
+	     }
+=======
 		File textFile = getTextFileFromUser(); // get the text file from a jdialog box
 		
 		if (textFile == null)
@@ -189,5 +239,6 @@ public class CharactersFromTextFileImporter{
 		
 		for (Person person : people)
 			bookModel.setNewPerson(person);
+>>>>>>> nate-bender-branch
 	}
 }

@@ -86,7 +86,7 @@ public class CharactersFromTextFileImporter{
           				aperson.add(p);
 	          	}
           	}
-			
+			setGenders(aperson); // call Gender API set gender for list of people
 			addCharactersToModel(aperson); // add the list of characters to the UI
 		} 
 		catch (ClassCastException | ClassNotFoundException | IOException e) {
@@ -189,5 +189,29 @@ public class CharactersFromTextFileImporter{
 		
 		for (Person person : people)
 			bookModel.setNewPerson(person);
+	}
+	// set genders for a person in people
+	public void setGenders(ArrayList<Person> people){
+		List<NameGender> genders = null;
+		try{
+			genders = api.getGenders(people); 
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+		
+		for(int k = 0; k < people.size(); k++){
+			Person p = people.get(k); 
+			if(genders != null){
+				NameGender gender = genders.get(k);
+					if(gender.isMale()){
+						p.setGender(male);
+					}
+					else{
+						p.setGender(female);
+					}
+			}
+		}
+		
 	}
 }

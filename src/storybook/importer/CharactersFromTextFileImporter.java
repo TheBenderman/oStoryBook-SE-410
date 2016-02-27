@@ -5,7 +5,9 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
-
+import com.github.irobson.jgenderize.GenderizeIoAPI;
+import com.github.irobson.jgenderize.model.NameGender;
+import com.github.irobson.jgenderize.client.Genderize;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.*;
 import edu.stanford.nlp.ling.CoreLabel;

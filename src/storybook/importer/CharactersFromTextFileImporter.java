@@ -52,7 +52,7 @@ public class CharactersFromTextFileImporter{
 			System.out.println(e);
 		}
 		
-		ArrayList<Person> aperson = new ArrayList<Person>(); // arraylist of person objects
+		List<Person> aperson = new List<Person>(); // list of person objects
 		
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;

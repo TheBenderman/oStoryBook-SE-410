@@ -52,7 +52,7 @@ public class CharactersFromTextFileImporter{
 			System.out.println(e);
 		}
 		
-		List<Person> aperson = new List<Person>(); // list of person objects
+		List<Person> aperson = new ArrayList<Person>(); // list of person objects
 		
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;
@@ -64,31 +64,7 @@ public class CharactersFromTextFileImporter{
 			// run the stanford nlp text processor on the text file
 			List<Triple<String, Integer, Integer>> list = classifier.classifyToCharacterOffsets(lines);
 			
-			// for each of the classifications, find all the people, and parse them
-			for (Triple<String, Integer, Integer> trip : list) 
-			{
-				// the string in the triple contains the type of object that was classified
-				// the stanford nlp processor classifies tags, locations, people.. just to name a few
-				// we only want to collect people
-	          	if(trip.first().equals("PERSON"))
-	          	{
-	          		Person p = createPersonObject(lines, trip); // create the person object from the text file and stanford nlp
-	          		
-	          		boolean foundPerson = false;
-	          		
-	          		// Make sure we didn't already add the person to the array list
-	          		for (Person person : aperson)
-	          		{
-	          			if (p.getFirstname().toLowerCase().equals(person.getFirstname().toLowerCase())
-	          					&& p.getLastname().toLowerCase().equals(person.getLastname().toLowerCase()) )
-	          				foundPerson = true;
-	          		}
-	          		
-	          		if (!foundPerson)
-          				aperson.add(p);
-	          	}
-          	}
-			setGenders(aperson); // call Gender API set gender for list of people
+			processPeopleFromNLPOutput(aperson, list, lines);
 			addCharactersToModel(aperson); // add the list of characters to the UI
 		} 
 		catch (ClassCastException | ClassNotFoundException | IOException e) {
@@ -110,6 +86,34 @@ public class CharactersFromTextFileImporter{
 		return fileChooser.getSelectedFile(); // return the selected file
 	}
 	
+	public void processPeopleFromNLPOutput(List<Person> aperson, List<Triple<String, Integer, Integer>> list, String lines)
+	{
+		// for each of the classifications, find all the people, and parse them
+		for (Triple<String, Integer, Integer> trip : list) 
+		{
+			// the string in the triple contains the type of object that was classified
+			// the stanford nlp processor classifies tags, locations, people.. just to name a few
+			// we only want to collect people
+          	if(trip.first().equals("PERSON"))
+          	{
+          		Person p = createPersonObject(lines, trip); // create the person object from the text file and stanford nlp
+          		
+          		boolean foundPerson = false;
+          		
+          		// Make sure we didn't already add the person to the array list
+          		for (Person person : aperson)
+          		{
+          			if (p.getFirstname().toLowerCase().equals(person.getFirstname().toLowerCase())
+          					&& p.getLastname().toLowerCase().equals(person.getLastname().toLowerCase()) )
+          				foundPerson = true;
+          		}
+          		
+          		if (!foundPerson)
+      				aperson.add(p);
+          	}
+      	}
+	}
+	
 	public Person createPersonObject(String textLines, Triple<String, Integer, Integer> nlpPerson)
 	{
 		Person p = new Person();
@@ -119,101 +123,119 @@ public class CharactersFromTextFileImporter{
       	String name = textLines.substring(nlpPerson.second, nlpPerson.third());
       	name = name.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim(); //remove the excess whitespace
       		
-      	String[] names = name.split(" "); // split first and last name
+      	String[] firstAndLastNames = name.split(" "); // split first and last name
       	
       	// if the name is only a length of one, then maybe the previous word in the text file is a title
       	// fetch the title.
-      	if (names.length == 1)
+      	if (firstAndLastNames.length == 1)
       	{
-      		int space1 = textLines.lastIndexOf(" ", nlpPerson.second); // get the space right before first index of the name
-	      	
-      		if (space1 != -1)
-	      	{
-      			int space2 = textLines.lastIndexOf(" ", space1-1); // get the 2nd space right before first index of the name
-	      		
-      			if (space2 != -1)
-      			{
-		      		String title = textLines.substring(space2 + 1, space1); // get the title
-		      		
-		      		// check to see if the 
-		      		if (femaleTitles.contains(title) || maleTitles.contains(title) || genderNeutralTitles.contains(title))
-		      		{
-		      			p.setFirstname(title);
-		      			p.setLastname(names[0]);
-		      		}
-      			}
-	      	}
+      		String title = getPersonTitle(textLines, firstAndLastNames, nlpPerson);
       		
-      		// if the first and last name are both empty, that means there was no title. So it must be a single first name
-      		if (p.getFirstname().isEmpty() && p.getLastname().isEmpty())
-      			p.setFirstname(names[0]);
+      		// check to see if the 
+      		if (femaleTitles.contains(title) || maleTitles.contains(title) || genderNeutralTitles.contains(title))
+      		{
+      			p.setFirstname(title);
+      			p.setLastname(firstAndLastNames[0]);
+      		}
+      		
+      		if (title.equals("") || (p.getFirstname().isEmpty() && p.getLastname().isEmpty()))
+      			p.setFirstname(firstAndLastNames[0]);
       	}
       	else
       	{
-      		p.setFirstname(names[0]); // set the first name to the first word
-      		p.setLastname(names[names.length - 1]); // set the last name to the last word
-      	}
-      	
-      	StringBuffer abrv = new StringBuffer(p.getFirstname().substring(0, 2));
-		if (names.length > 1) {
-			abrv.append(p.getLastname().substring(0, 2));
-		}
+      		p.setFirstname(firstAndLastNames[0]); // set the first name to the first word
+      		p.setLastname(firstAndLastNames[firstAndLastNames.length - 1]); // set the last name to the last word
+      	}	
 			
-		p.setAbbreviation(abrv.toString());
+		p.setAbbreviation(getPersonAbbreviation(p, firstAndLastNames));
 		
-		setCharacterGender(p);
+		setCharacterGenderBasedOnTitle(p);
+		
+		// If we have not set the gender already, try to set the gender by the first name
+		if (p.getGender() != getMaleGender() && p.getGender() != getFemaleGender())
+			setCharacterGenderBasedOnFirstName(p);
 		
 		return p;
 	}
 	
+	public String getPersonAbbreviation(Person p, String[] firstAndLastNames)
+	{
+		// Set person name abbreviation
+      	StringBuffer abrv = new StringBuffer(p.getFirstname().substring(0, 2));
+		if (firstAndLastNames.length > 1)
+			abrv.append(p.getLastname().substring(0, 2));
+		
+		return abrv.toString();
+	}
+	
+	public String getPersonTitle(String textLines, String[] firstAndLastNames, Triple<String, Integer, Integer> nlpPerson)
+	{
+		int space1 = textLines.lastIndexOf(" ", nlpPerson.second); // get the space right before first index of the name
+      	
+  		if (space1 != -1)
+      	{
+  			int space2 = textLines.lastIndexOf(" ", space1-1); // get the 2nd space right before first index of the name
+      		
+  			if (space2 != -1)
+  			{
+	      		String title = textLines.substring(space2 + 1, space1); // get the title
+	      		
+	      		return title;
+  			}
+      	}
+  		
+  		return "";
+	}
+	
 	// Set the gender of the character
-	public void setCharacterGender(Person p)
+	public void setCharacterGenderBasedOnTitle(Person p)
+	{
+		// First, check if the first name is a title
+		// If it is a title, check if it is a gender specific title
+		if (femaleTitles.contains(p.getFirstname()))
+			p.setGender(getFemaleGender());
+		else if (maleTitles.contains(p.getFirstname()))
+			p.setGender(getMaleGender());
+	}
+	
+	public void setCharacterGenderBasedOnFirstName(Person p)
+	{
+		Genderize api = GenderizeIoAPI.create();
+		NameGender gender = api.getGender(p.getFirstname());
+		
+		if(gender.isMale())
+			p.setGender(getMaleGender());
+		else
+			p.setGender(getFemaleGender());
+
+	}
+	
+	private Gender getMaleGender()
 	{
 		BookModel bookModel = mainFrame.getBookModel();
 		Session session = bookModel.beginTransaction();
 		
 		GenderDAOImpl genderDaoImpl = new GenderDAOImpl(session);
-		Gender male = genderDaoImpl.findMale(); // get the default male gender
-		Gender female = genderDaoImpl.findFemale(); // get the default female gender
 		
-		// First, check if the first name is a title
-		// If it is a title, check if it is a gender specific title
-		if (femaleTitles.contains(p.getFirstname()))
-			p.setGender(female);
-		else if (maleTitles.contains(p.getFirstname()))
-			p.setGender(male);
+		return genderDaoImpl.findMale();
 	}
 	
-	public void addCharactersToModel(ArrayList<Person> people)
+	private Gender getFemaleGender()
+	{
+		BookModel bookModel = mainFrame.getBookModel();
+		Session session = bookModel.beginTransaction();
+		
+		GenderDAOImpl genderDaoImpl = new GenderDAOImpl(session);
+		
+		return genderDaoImpl.findFemale();
+	}
+	
+	public void addCharactersToModel(List<Person> people)
 	{
 		BookModel bookModel = mainFrame.getBookModel();
 		bookModel.beginTransaction();
 		
 		for (Person person : people)
 			bookModel.setNewPerson(person);
-	}
-	// set genders for a person in people
-	public void setGenders(ArrayList<Person> people){
-		List<NameGender> genders = null;
-		try{
-			genders = api.getGenders(people); 
-		}
-		catch(Exception e){
-			System.out.println(e);
-		}
-		
-		for(int k = 0; k < people.size(); k++){
-			Person p = people.get(k); 
-			if(genders != null){
-				NameGender gender = genders.get(k);
-					if(gender.isMale()){
-						p.setGender(male);
-					}
-					else{
-						p.setGender(female);
-					}
-			}
-		}
-		
 	}
 }

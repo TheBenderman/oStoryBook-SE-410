@@ -5,9 +5,6 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
-import com.github.irobson.jgenderize.GenderizeIoAPI;
-import com.github.irobson.jgenderize.model.NameGender;
-import com.github.irobson.jgenderize.client.Genderize;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.*;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -26,12 +23,16 @@ public class CharactersFromTextFileImporter{
 	
 	private MainFrame mainFrame;
 	
-	private List<String> femaleTitles = Arrays.asList("Miss", "Ms.", "Mrs.", "Misses");
-	private List<String> maleTitles = Arrays.asList("Mr.", "Mister");
+	private List<String> femaleTitles = Arrays.asList("Miss", "Ms.", "Mrs.", "Misses", "Aunt", "Grandma", "Grandmother");
+	private List<String> maleTitles = Arrays.asList("Mr.", "Mister", "Uncle", "Grandpa", "Grandfather");
 	private List<String> genderNeutralTitles = Arrays.asList("Professor", "Dr.", "Doctor");
 	
-	public CharactersFromTextFileImporter(MainFrame m) {
+	private List<Person> aperson;
+	
+	public CharactersFromTextFileImporter(MainFrame m) 
+	{
 		mainFrame = m;
+		aperson = new ArrayList<Person>();
 	}
 	
 	public void importCharactersFromTextFile()
@@ -52,8 +53,6 @@ public class CharactersFromTextFileImporter{
 			System.out.println(e);
 		}
 		
-		List<Person> aperson = new ArrayList<Person>(); // list of person objects
-		
 		// Make sure this file is in your eclipse root folder
 		AbstractSequenceClassifier<CoreLabel> classifier;
 		try 
@@ -64,8 +63,8 @@ public class CharactersFromTextFileImporter{
 			// run the stanford nlp text processor on the text file
 			List<Triple<String, Integer, Integer>> list = classifier.classifyToCharacterOffsets(lines);
 			
-			processPeopleFromNLPOutput(aperson, list, lines);
-			addCharactersToModel(aperson); // add the list of characters to the UI
+			processPeopleFromNLPOutput(list, lines);
+			addCharactersToModel(); // add the list of characters to the UI
 		} 
 		catch (ClassCastException | ClassNotFoundException | IOException e) {
 			e.printStackTrace();
@@ -86,7 +85,7 @@ public class CharactersFromTextFileImporter{
 		return fileChooser.getSelectedFile(); // return the selected file
 	}
 	
-	public void processPeopleFromNLPOutput(List<Person> aperson, List<Triple<String, Integer, Integer>> list, String lines)
+	public void processPeopleFromNLPOutput(List<Triple<String, Integer, Integer>> list, String lines)
 	{
 		// for each of the classifications, find all the people, and parse them
 		for (Triple<String, Integer, Integer> trip : list) 
@@ -98,17 +97,7 @@ public class CharactersFromTextFileImporter{
           	{
           		Person p = createPersonObject(lines, trip); // create the person object from the text file and stanford nlp
           		
-          		boolean foundPerson = false;
-          		
-          		// Make sure we didn't already add the person to the array list
-          		for (Person person : aperson)
-          		{
-          			if (p.getFirstname().toLowerCase().equals(person.getFirstname().toLowerCase())
-          					&& p.getLastname().toLowerCase().equals(person.getLastname().toLowerCase()) )
-          				foundPerson = true;
-          		}
-          		
-          		if (!foundPerson)
+          		if (p != null)
       				aperson.add(p);
           	}
       	}
@@ -121,7 +110,7 @@ public class CharactersFromTextFileImporter{
 		// get the person's name from the text file. the 2nd parameter of the triple contains the index of the first element
 		// of the name, and the 3rd parameter of the triple contains the index of the last element of the name
       	String name = textLines.substring(nlpPerson.second, nlpPerson.third());
-      	name = name.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim(); //remove the excess whitespace
+      	name = cleanUpString(name); //remove the excess whitespace
       		
       	String[] firstAndLastNames = name.split(" "); // split first and last name
       	
@@ -138,6 +127,7 @@ public class CharactersFromTextFileImporter{
       			p.setLastname(firstAndLastNames[0]);
       		}
       		
+      		// If we found no title, and we have not set a first/last name, then the person has a single first name.
       		if (title.equals("") || (p.getFirstname().isEmpty() && p.getLastname().isEmpty()))
       			p.setFirstname(firstAndLastNames[0]);
       	}
@@ -146,16 +136,27 @@ public class CharactersFromTextFileImporter{
       		p.setFirstname(firstAndLastNames[0]); // set the first name to the first word
       		p.setLastname(firstAndLastNames[firstAndLastNames.length - 1]); // set the last name to the last word
       	}	
+      	
+      	if (personAlreadyExists(p)) // if the person already exists in our collection, we don't want to do anymore
+      		return null;
 			
 		p.setAbbreviation(getPersonAbbreviation(p, firstAndLastNames));
-		
-		setCharacterGenderBasedOnTitle(p);
-		
-		// If we have not set the gender already, try to set the gender by the first name
-		if (p.getGender() != getMaleGender() && p.getGender() != getFemaleGender())
-			setCharacterGenderBasedOnFirstName(p);
+		setCharacterGender(p);
 		
 		return p;
+	}
+	
+	public boolean personAlreadyExists(Person p)
+	{	
+  		// Make sure we didn't already add the person to the array list
+  		for (Person person : aperson)
+  		{
+  			if (p.getFirstname().toLowerCase().equals(person.getFirstname().toLowerCase())
+  					&& p.getLastname().toLowerCase().equals(person.getLastname().toLowerCase()) )
+  				return true;
+  		}
+  		
+  		return false;
 	}
 	
 	public String getPersonAbbreviation(Person p, String[] firstAndLastNames)
@@ -187,6 +188,15 @@ public class CharactersFromTextFileImporter{
   		return "";
 	}
 	
+	public void setCharacterGender(Person p)
+	{
+		setCharacterGenderBasedOnTitle(p); // Try to set the character's gender based on title like Mr.
+		
+		// If we have not set the gender already, try to set the gender by the first name
+		if (p.getGender() != getMaleGender() && p.getGender() != getFemaleGender())
+			setCharacterGenderBasedOnFirstName(p);
+	}
+	
 	// Set the gender of the character
 	public void setCharacterGenderBasedOnTitle(Person p)
 	{
@@ -200,12 +210,12 @@ public class CharactersFromTextFileImporter{
 	
 	public void setCharacterGenderBasedOnFirstName(Person p)
 	{
-		Genderize api = GenderizeIoAPI.create();
-		NameGender gender = api.getGender(p.getFirstname());
+		GenderizeAPI genderizeApi = new GenderizeAPI();
+		String genderString = genderizeApi.getPersonGenderString(p);
 		
-		if(gender.isMale())
+		if(genderString.equals("male"))
 			p.setGender(getMaleGender());
-		else
+		else if (genderString.equals("female"))
 			p.setGender(getFemaleGender());
 
 	}
@@ -230,12 +240,17 @@ public class CharactersFromTextFileImporter{
 		return genderDaoImpl.findFemale();
 	}
 	
-	public void addCharactersToModel(List<Person> people)
+	public void addCharactersToModel()
 	{
 		BookModel bookModel = mainFrame.getBookModel();
 		bookModel.beginTransaction();
 		
-		for (Person person : people)
+		for (Person person : aperson)
 			bookModel.setNewPerson(person);
+	}
+	
+	private String cleanUpString(String str)
+	{
+		return str.replace("\n", " ").replace("\r", " ").replaceAll("\\s+", " ").trim();
 	}
 }

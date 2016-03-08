@@ -20,14 +20,15 @@ public class GenderizeAPI {
 		
 	}
 	
+	// get the person's gender for a specific person
 	public String getPersonGenderString(Person p)
 	{
-		JSONObject json = getGenderizeJSONResponseFromURL(p.getFirstname());
+		JSONObject json = getGenderizeJSONResponseFromURL(p.getFirstname()); // call the genderize api with the person's first name
 		try
 		{
-			String genderString = json.getString("gender");
+			String genderString = json.getString("gender"); // get the gender attribute from the returned json string
 			
-			if (genderString != null)
+			if (genderString != null) // if the string is null, then the name cant be found in their database
 				return genderString;
 		}
 		catch (JSONException e)
@@ -38,16 +39,18 @@ public class GenderizeAPI {
 		return "";
 	}
 	
-	private JSONObject getGenderizeJSONResponseFromURL(String queryString)
+	// Call the genderize api through an HTTP request and get the json response
+	private JSONObject getGenderizeJSONResponseFromURL(String name)
 	{
 		try 
 		{
-			URL genderizeURL = new URL("https://api.genderize.io/?name=" + queryString);
+			// call the genderize api with the person's name
+			URL genderizeURL = new URL("https://api.genderize.io/?name=" + name);
 			
 			InputStream is = genderizeURL.openStream();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-			String jsonText = readAllCharacters(rd);
-			JSONObject json = new JSONObject(jsonText);
+			String jsonText = readAllCharacters(rd); // read the complete response
+			JSONObject json = new JSONObject(jsonText); // create a json object from the response text
 			
 			is.close();
 			
@@ -64,6 +67,7 @@ public class GenderizeAPI {
 		return null;
 	}
 	
+	// read all of the characters from the reader
 	private String readAllCharacters(Reader rd) throws IOException 
 	{
 	    StringBuilder sb = new StringBuilder();
